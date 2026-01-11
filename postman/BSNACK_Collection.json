@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "b3f0e8a1-2b1a-4e5a-8f9c-123456789abc",
     "name": "BSNACK API",
-    "description": "API Collection for BSNACK Point of Sales & Inventory System.",
+    "description": "API Collection for BSNACK API.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
