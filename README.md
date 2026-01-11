@@ -6,7 +6,7 @@ BSNACK is a specialized POS and Inventory management system designed for snack b
 
 * **Inventory Management:** Track products by type, flavor, size, and manufacturing date.
 * **Customer Loyalty:** * Earn 1 point for every **1,000 IDR** spent.
-* Redeem points for free products (Small: 200 pts, Medium: 500 pts, Large: 1,000 pts).
+* Redeem points for free products (Small: 200 pts, Medium: 300 pts, Large: 500 pts).
 
 
 * **Owner Sales Report:** * Aggregated income and products sold.
