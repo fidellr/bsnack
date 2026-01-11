@@ -1,0 +1,208 @@
+{
+  "info": {
+    "_postman_id": "b3f0e8a1-2b1a-4e5a-8f9c-123456789abc",
+    "name": "BSNACK API",
+    "description": "API Collection for BSNACK Point of Sales & Inventory System.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Inventory: Add Product (Small)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"name\": \"Keripik Pangsit\",\n    \"type\": \"Keripik Pangsit\",\n    \"flavor\": \"Jagung Bakar\",\n    \"size\": \"Small\",\n    \"price\": 10000,\n    \"quantity\": 50,\n    \"manufacturing_date\": \"2025-10-22\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/products",
+          "host": ["{{base_url}}"],
+          "path": ["products"]
+        },
+        "description": "Adds a Small Keripik Pangsit (10k IDR). ID usually becomes 1."
+      },
+      "response": []
+    },
+    {
+      "name": "2. Inventory: Add Product (Medium)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"name\": \"Keripik Pangsit\",\n    \"type\": \"Keripik Pangsit\",\n    \"flavor\": \"Balado\",\n    \"size\": \"Medium\",\n    \"price\": 25000,\n    \"quantity\": 30,\n    \"manufacturing_date\": \"2025-10-22\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/products",
+          "host": ["{{base_url}}"],
+          "path": ["products"]
+        },
+        "description": "Adds a Medium Keripik Pangsit (25k IDR). ID usually becomes 2."
+      },
+      "response": []
+    },
+    {
+      "name": "3. Inventory: Get Products by Date",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/products?date=2025-10-22",
+          "host": ["{{base_url}}"],
+          "path": ["products"],
+          "query": [
+            {
+              "key": "date",
+              "value": "2025-10-22",
+              "description": "Filter products manufactured on this specific date"
+            }
+          ]
+        },
+        "description": "Retrieves the list of products made on 2025-10-22."
+      },
+      "response": []
+    },
+    {
+      "name": "4. Transaction: Fery Buys Small (New Customer, Current Date - Optional Date Omitted)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"customer_name\": \"Fery\",\n    \"product_id\": 1,\n    \"quantity\": 2\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/transactions",
+          "host": ["{{base_url}}"],
+          "path": ["transactions"]
+        },
+        "description": "Fery buys 2 Small items (Total 20k). Should earn 20 points. System marks him as New Customer."
+      },
+      "response": []
+    },
+    {
+      "name": "5. Transaction: Fery Buys Small (Backdated to 2025)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"customer_name\": \"Fery\",\n    \"product_id\": 1,\n    \"quantity\": 2,\n    \"transaction_date\": \"2025-10-22\"\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": {
+          "raw": "{{base_url}}/transactions",
+          "host": ["{{base_url}}"],
+          "path": ["transactions"]
+        },
+        "description": "Explicitly sets the date to 2025 to test the Owner's Report range."
+      }
+    },
+    {
+      "name": "6. Transaction: Fery Buys Medium (Accumulate Points)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"customer_name\": \"Fery\",\n    \"product_id\": 2,\n    \"quantity\": 10,\n    \"transaction_date\": \"2025-10-22\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/transactions",
+          "host": ["{{base_url}}"],
+          "path": ["transactions"]
+        },
+        "description": "Fery buys 10 Medium items (Total 250k). Should earn 250 points. Total Points: 270."
+      },
+      "response": []
+    },
+    {
+      "name": "7. Report: Owner Sales Report",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/transactions?start=2025-10-01&end=2026-01-12",
+          "host": ["{{base_url}}"],
+          "path": ["transactions"],
+          "query": [
+            {
+              "key": "start",
+              "value": "2025-10-01"
+            },
+            {
+              "key": "end",
+              "value": "2025-12-31"
+            }
+          ]
+        },
+        "description": "Shows Total Income, Best Seller, and Transaction List. Fery should show 'is_new_customer': true."
+      },
+      "response": []
+    },
+    {
+      "name": "8. Redemption: Fery Redeems Points",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"customer_name\": \"Fery\",\n    \"product_id\": 1\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/redemptions",
+          "host": ["{{base_url}}"],
+          "path": ["redemptions"]
+        },
+        "description": "Fery exchanges 200 points for 1 Small Product (ID 1). Fery's points should drop to 70."
+      },
+      "response": []
+    },
+    {
+      "name": "9. Customer: List All Customers",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/customers",
+          "host": ["{{base_url}}"],
+          "path": ["customers"]
+        },
+        "description": "Returns list of customers and their point balance."
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080",
+      "type": "string"
+    }
+  ]
+}
