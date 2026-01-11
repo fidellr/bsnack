@@ -33,16 +33,7 @@ CREATE TABLE transactions (
     transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 4. Create Redemptions Table (Loyalty Point Exchange)
-CREATE TABLE redemptions (
-    id SERIAL PRIMARY KEY,
-    customer_id INT NOT NULL REFERENCES customers(id),
-    product_id INT NOT NULL REFERENCES products(id),
-    points_used INT NOT NULL,
-    redeemed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- 5. Create Performance Indexes
+-- 4. Create Performance Indexes
 CREATE INDEX idx_transactions_date ON transactions(transaction_date);
 CREATE INDEX idx_products_manuf_date ON products(manufacturing_date);
 CREATE INDEX idx_customers_name ON customers(name);
