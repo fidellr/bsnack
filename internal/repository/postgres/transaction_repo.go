@@ -24,12 +24,19 @@ func (r *TransactionRepo) Create(ctx context.Context, t *domain.Transaction) err
 		t.CustomerID, t.ProductID, t.Quantity, t.TotalPrice, t.TransactionDate,
 	).Scan(&t.ID)
 }
+
 func (r *TransactionRepo) GetReport(ctx context.Context, start, end string) (*domain.SalesReport, error) {
 	report := &domain.SalesReport{
 		StartDate:    start,
 		EndDate:      end,
 		Transactions: []domain.Transaction{},
 	}
+
+	tx, err := r.db.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelRepeatableRead})
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback()
 
 	queryAgg := `
         SELECT 
@@ -40,7 +47,7 @@ func (r *TransactionRepo) GetReport(ctx context.Context, start, end string) (*do
         WHERE transaction_date::date >= $1::date 
           AND transaction_date::date <= $2::date`
 
-	err := r.db.QueryRowContext(ctx, queryAgg, start, end).Scan(
+	err = tx.QueryRowContext(ctx, queryAgg, start, end).Scan(
 		&report.TotalCustomers, &report.TotalProducts, &report.TotalIncome,
 	)
 	if err != nil {
@@ -57,7 +64,7 @@ func (r *TransactionRepo) GetReport(ctx context.Context, start, end string) (*do
         ORDER BY SUM(t.quantity) DESC LIMIT 1`
 
 	var bestSeller sql.NullString
-	err = r.db.QueryRowContext(ctx, queryBest, start, end).Scan(&bestSeller)
+	err = tx.QueryRowContext(ctx, queryBest, start, end).Scan(&bestSeller)
 	if err == nil && bestSeller.Valid {
 		report.BestSeller = bestSeller.String
 	} else {
@@ -68,6 +75,8 @@ func (r *TransactionRepo) GetReport(ctx context.Context, start, end string) (*do
 	queryList := `
         SELECT 
             t.id, 
+            t.customer_id,
+            t.product_id,
             c.name, 
             p.name, 
             p.size, 
@@ -84,28 +93,35 @@ func (r *TransactionRepo) GetReport(ctx context.Context, start, end string) (*do
           AND t.transaction_date::date <= $2::date
         ORDER BY t.transaction_date DESC`
 
-	rows, err := r.db.QueryContext(ctx, queryList, start, end)
+	rows, err := tx.QueryContext(ctx, queryList, start, end)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
 	for rows.Next() {
-		var tx domain.Transaction
+		var trx domain.Transaction
 		if err := rows.Scan(
-			&tx.ID,
-			&tx.CustomerName,
-			&tx.ProductName,
-			&tx.ProductSize,
-			&tx.ProductFlavor,
-			&tx.Quantity,
-			&tx.TotalPrice,
-			&tx.TransactionDate,
-			&tx.IsNewCustomer,
+			&trx.ID,
+			&trx.CustomerID,
+			&trx.ProductID,
+			&trx.CustomerName,
+			&trx.ProductName,
+			&trx.ProductSize,
+			&trx.ProductFlavor,
+			&trx.Quantity,
+			&trx.TotalPrice,
+			&trx.TransactionDate,
+			&trx.IsNewCustomer,
 		); err != nil {
 			return nil, err
 		}
-		report.Transactions = append(report.Transactions, tx)
+
+		report.Transactions = append(report.Transactions, trx)
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
 	}
 
 	return report, nil
